@@ -1,5 +1,5 @@
 // DigitalOcean Functions (OpenWhisk) handler
-// Accepts GET ?name=&email=&class_date=&cohort= or POST JSON body
+// Accepts GET ?name=&email=&start_date=&cohort= or POST JSON body
 // Writes to Notion DB using env vars: NOTION_SECRET, NOTION_DB_ID
 
 const NOTION_API = "https://api.notion.com/v1/pages";
@@ -39,15 +39,17 @@ exports.main = async (args) => {
   const data = parseBody(args);
   const name = (data.name || "").trim();
   const email = (data.email || "").trim();
-  const class_date = (data.class_date || "").trim(); // ISO date yyyy-mm-dd
+  const start_date = (data.start_date || "").trim(); // ISO date yyyy-mm-dd
   const cohort = (data.cohort || "unknown").trim();
+  const goal = (data.goal || "unknown").trim();
+
 
   // Basic validation
   const errors = [];
   if (!name) errors.push("name is required");
   if (!validEmail(email)) errors.push("valid email is required");
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(class_date)) errors.push("class_date must be ISO yyyy-mm-dd");
-
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(start_date)) errors.push("start_date must be ISO yyyy-mm-dd");
+  
   if (errors.length) {
     return {
       statusCode: 400,
@@ -57,15 +59,17 @@ exports.main = async (args) => {
   }
 
   // Build Notion page payload — adjust property names to match your DB
-  const payload = {
-    parent: { database_id: process.env.NOTION_DB_ID },
-    properties: {
-      Name: { title: [{ text: { content: name } }] },
-      Email: { email },
-      "Class Date": { date: { start: class_date } },
-      Cohort: { select: { name: cohort } }
-    }
-  };
+const payload = {
+  parent: { database_id: process.env.NOTION_DB_ID },
+   properties: {
+    name: { title: [{ text: { content: name } }] },   // Title
+    email: { email },                                  // Email
+    start_date: { date: { start: start_date } },       // Date
+    cohort: { rich_text: [{ text: { content: cohort } }] }, // 🔁 rich_text
+    expectation: { rich_text: [{ text: { content: goal } }] }, // Rich text
+    status: { select: { name: "registered" } }         // Select (ensure option exists)
+  }
+};
 
   try {
     const resp = await fetch(NOTION_API, {
