@@ -48,8 +48,8 @@
 
     .instructor{display:flex;align-items:center;gap:12px;background:#f7fbff;border:1px solid #e1edf7;border-radius:12px;padding:12px}
     .avatar{
-      width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
-      font-weight:800;background:#0f2b3a;color:#fff
+      width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      font-weight:800;background:#0f2b3a;color:#fff;line-height:1;aspect-ratio:1/1;
     }
     .who{font-weight:800}
     .cred{color:#577189;font-size:14px}
@@ -70,15 +70,16 @@
     }
     figcaption{display:flex;align-items:center;gap:10px}
     .mini-avatar{
-      width:32px;height:32px;border-radius:50%;display:grid;place-items:center;
-      font-weight:800;background:#ffd7bf;color:#7b360d;flex:0 0 auto
+      width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      font-weight:800;background:#ffd7bf;color:#7b360d;flex:0 0 auto;line-height:1;aspect-ratio:1/1;
     }
     .name{font-weight:800}
     .role{color:#577189;font-size:13px}
 
     .dots{display:flex;gap:6px;margin-top:10px}
     .dots button{
-      width:8px;height:8px;border-radius:50%;border:none;background:#cddae3;cursor:pointer
+      width:10px;height:10px;border-radius:50%;border:none;background:#cddae3;cursor:pointer;
+      padding:0;flex:0 0 auto;
     }
     .dots button.active{background:#0f2b3a}
 
@@ -86,8 +87,12 @@
       display:flex;gap:8px;align-items:flex-start;
       font-size:14px;color:#2c5a4e;background:#eef8f4;border:1px solid #cfeae0;border-radius:12px;padding:10px 12px
     }
-    .check{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;
-      background:#137d60;color:#fff;font-weight:900;font-size:13px;line-height:1}
+    .check{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:20px;height:20px;aspect-ratio:1/1;border-radius:50%;
+      background:#137d60;flex:0 0 20px;
+    }
+    .check svg{display:block}
   </style>
 </head>
 <body>
@@ -207,7 +212,11 @@
           </div>
 
           <div class="guarantee">
-            <span class="check">✓</span>
+            <span class="check" aria-hidden="true">
+              <svg width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4.6 8.2L2.4 6l-.8.8 3 3 5-5-.8-.8-4.2 4.2z" fill="#fff"/>
+              </svg>
+            </span>
             Practical, hands-on sessions. If you don’t leave with a working app and a clear next-step plan, tell us and we’ll make it right.
           </div>
         </div>
