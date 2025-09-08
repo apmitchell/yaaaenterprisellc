@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>QR Code Generator with Real Ads</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Google AdSense global script -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1c2541, #3a506b, #5bc0be);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Header with leaderboard */
+    .header {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border-radius: 0 0 12px 12px;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .leaderboard-ad {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    @media (max-width: 800px) {
+      .leaderboard-ad ins {
+        width: 320px !important;
+        height: 50px !important;
+      }
+    }
+
+    /* Layout */
+    .layout {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 1rem;
+    }
+
+    .sidebar {
+      width: 180px;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 1rem;
+      margin: 0 1rem;
+      color: #eee;
+      font-size: 0.9rem;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      border-radius: 16px;
+      padding: 2rem;
+      width: 400px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      color: #fff;
+    }
+
+    h1 {
+      margin: 0 0 1rem;
+      font-size: 1.8rem;
+      text-align: center;
+      color: #f1f1f1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 1rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      background: #5bc0be;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #3a506b;
+    }
+
+    #qrcode {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 12px;
+      min-height: 280px;
+    }
+
+    .footer {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border-radius: 12px 12px 0 0;
+      padding: 1rem;
+      text-align: center;
+      color: #eee;
+      font-size: 0.9rem;
+      box-shadow: 0 -6px 20px rgba(0,0,0,0.2);
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        flex-direction: column;
+        align-items: center;
+      }
+      .sidebar {
+        width: 90%;
+        margin: 1rem 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header with leaderboard ad -->
+  <header class="header">
+    <div class="leaderboard-ad">
+      <ins class="adsbygoogle"
+           style="display:inline-block;width:728px;height:90px"
+           data-ad-client="ca-pub-1234567890"
+           data-ad-slot="1111111111"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- Left Ads -->
+    <aside class="sidebar">
+      <ins class="adsbygoogle"
+           style="display:inline-block;width:160px;height:600px"
+           data-ad-client="ca-pub-1234567890"
+           data-ad-slot="2222222222"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </aside>
+
+    <!-- QR Generator -->
+    <main class="container">
+      <h1>QR Code Generator</h1>
+      <label for="text">Enter text or URL</label>
+      <input id="text" type="text" value="https://example.com" />
+      <button onclick="makeCode()">Generate</button>
+      <div id="qrcode"></div>
+    </main>
+
+    <!-- Right Ads -->
+    <aside class="sidebar">
+      <ins class="adsbygoogle"
+           style="display:inline-block;width:160px;height:600px"
+           data-ad-client="ca-pub-1234567890"
+           data-ad-slot="3333333333"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </aside>
+  </div>
+
+  <!-- Footer Ad -->
+  <footer class="footer">
+    <ins class="adsbygoogle"
+         style="display:inline-block;width:728px;height:90px"
+         data-ad-client="ca-pub-1234567890"
+         data-ad-slot="4444444444"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </footer>
+
+  <script>
+    let qr = new QRCode(document.getElementById("qrcode"), {
+      text: "https://example.com",
+      width: 256,
+      height: 256,
+      colorDark: "#ffffff",
+      colorLight: "transparent",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    function makeCode() {
+      let val = document.getElementById("text").value.trim();
+      if (!val) {
+        alert("Please enter some text or URL.");
+        return;
+      }
+      qr.makeCode(val);
+    }
+  </script>
+</body>
+</html>
