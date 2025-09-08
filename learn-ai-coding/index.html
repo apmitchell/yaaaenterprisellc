@@ -31,12 +31,63 @@
       width:100%; padding:12px 14px; border:2px solid #d7e3ea; border-radius:10px; font:inherit; background:#fff;
     }
     input:focus, textarea:focus{outline:none;border-color:#7fb5ff;box-shadow:0 0 0 4px rgba(127,181,255,.15)}
+    small.help{display:block;color:#557086;margin-top:6px}
     .error{color:var(--warn);font-weight:700;margin-top:8px}
     .ok{color:var(--ok);font-weight:700;margin-top:8px}
     ul.schedule{margin:10px 0 0 18px}
     .cta{margin-top:16px;background:var(--ink);color:#fff;border:none;font-weight:800;cursor:pointer}
     .cta[disabled]{opacity:.5;cursor:not-allowed}
     .foot{margin-top:16px;color:#476373}
+
+    /* --- Right card upgrades --- */
+    .value-card{display:flex;flex-direction:column;gap:16px}
+    .value-section{margin-top:4px}
+    .value-title{margin:6px 0 8px;font-size:18px}
+    .value-list{margin:0 0 6px 18px;padding:0}
+    .value-list li{margin:6px 0}
+
+    .instructor{display:flex;align-items:center;gap:12px;background:#f7fbff;border:1px solid #e1edf7;border-radius:12px;padding:12px}
+    .avatar{
+      width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
+      font-weight:800;background:#0f2b3a;color:#fff
+    }
+    .who{font-weight:800}
+    .cred{color:#577189;font-size:14px}
+
+    .divider{border:none;border-top:1px solid #e8eef2;margin:4px 0}
+
+    .social-proof{margin-top:2px}
+    .testi{position:relative;min-height:150px}
+    .quote{display:none;margin:0}
+    .quote.active{display:block;animation:fade .4s ease}
+    @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+    blockquote{
+      margin:0 0 10px; font-size:16px; line-height:1.45; color:#13394a;
+      position:relative; padding-left:28px;
+    }
+    blockquote:before{
+      content:"“"; position:absolute; left:0; top:-6px; font-size:38px; line-height:1; color:#ff8b3d;
+    }
+    figcaption{display:flex;align-items:center;gap:10px}
+    .mini-avatar{
+      width:32px;height:32px;border-radius:50%;display:grid;place-items:center;
+      font-weight:800;background:#ffd7bf;color:#7b360d;flex:0 0 auto
+    }
+    .name{font-weight:800}
+    .role{color:#577189;font-size:13px}
+
+    .dots{display:flex;gap:6px;margin-top:10px}
+    .dots button{
+      width:8px;height:8px;border-radius:50%;border:none;background:#cddae3;cursor:pointer
+    }
+    .dots button.active{background:#0f2b3a}
+
+    .guarantee{
+      display:flex;gap:8px;align-items:flex-start;
+      font-size:14px;color:#2c5a4e;background:#eef8f4;border:1px solid #cfeae0;border-radius:12px;padding:10px 12px
+    }
+    .check{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;
+      background:#137d60;color:#fff;font-weight:900;font-size:13px;line-height:1}
   </style>
 </head>
 <body>
@@ -46,13 +97,13 @@
       <h1>Build Your First <span class="em">AI-Powered App</span> in 4 Weeks</h1>
       <div class="sub">No Experience Needed • Savannah · 6:00pm cohorts (Mon/Tue)</div>
       <div class="grid">
-        <!-- Form -->
+        <!-- LEFT: FORM -->
         <form id="regForm" class="card" onsubmit="return false">
           <label for="fullName">Full Name</label>
-          <input id="fullName" required />
+          <input id="fullName" autocomplete="name" required />
 
           <label for="email">Email</label>
-          <input id="email" type="email" required />
+          <input id="email" type="email" autocomplete="email" required />
 
           <label for="startDate">Choose Your Start Date</label>
           <input id="startDate" type="date" required />
@@ -71,22 +122,101 @@
           <div class="foot">$99 + includes $200 in free cloud credits</div>
         </form>
 
-        <!-- Info -->
-        <div class="card">
+        <!-- RIGHT: VALUE + SOCIAL PROOF -->
+        <div class="card value-card">
           <div class="price">$99</div>
-          <ul>
-            <li>Coding fundamentals & AI basics</li>
-            <li>Build a simple AI-powered app</li>
-            <li>Use AI to automate tasks & create value</li>
-            <li>Launch roadmap for side-income or career</li>
-          </ul>
+
+          <div class="value-section">
+            <h3 class="value-title">What you’ll build & learn</h3>
+            <ul class="value-list">
+              <li>Code your first AI-powered app</li>
+              <li>Use AI tools to automate real work</li>
+              <li>Ship a project you can show employers/clients</li>
+              <li>Roadmap for turning skills into income</li>
+            </ul>
+          </div>
+
+          <div class="instructor">
+            <div class="avatar">AM</div>
+            <div>
+              <div class="who">Led by Aaron Mitchell</div>
+              <div class="cred">Engineering Leader @ DigitalOcean • ex-Twilio</div>
+            </div>
+          </div>
+
+          <hr class="divider" />
+
+          <div class="social-proof">
+            <h3 class="value-title">What people say</h3>
+
+            <div class="testi" id="testi">
+              <figure class="quote active">
+                <blockquote>
+                  “Aaron built trust fast, added the right structure, and drove a too-big-to-fail project to completion ahead of schedule. I’d re-hire him in a heartbeat.”
+                </blockquote>
+                <figcaption>
+                  <span class="mini-avatar">KL</span>
+                  <div>
+                    <div class="name">Kelly Lu</div>
+                    <div class="role">Director of Engineering, DigitalOcean • ex-Twilio</div>
+                  </div>
+                </figcaption>
+              </figure>
+
+              <figure class="quote">
+                <blockquote>
+                  “He shielded engineers so we could focus and ship highly scalable work. Prepared, thoughtful, and a joy to work with.”
+                </blockquote>
+                <figcaption>
+                  <span class="mini-avatar">ST</span>
+                  <div>
+                    <div class="name">Samuel Tapia</div>
+                    <div class="role">Senior Software Engineer, Twilio</div>
+                  </div>
+                </figcaption>
+              </figure>
+
+              <figure class="quote">
+                <blockquote>
+                  “Aaron gives clarity, solves root causes, and empowers people. One of the best leaders I’ve worked with.”
+                </blockquote>
+                <figcaption>
+                  <span class="mini-avatar">DT</span>
+                  <div>
+                    <div class="name">Drew Thompson</div>
+                    <div class="role">Staff Product Engineer, Segment</div>
+                  </div>
+                </figcaption>
+              </figure>
+
+              <figure class="quote">
+                <blockquote>
+                  “Promoting Aaron to EM was the best decision I made. World-class product instincts, system design, and culture building.”
+                </blockquote>
+                <figcaption>
+                  <span class="mini-avatar">PC</span>
+                  <div>
+                    <div class="name">Paras Chadha</div>
+                    <div class="role">Head of Engineering, Block • ex-Meta/Amazon/Twitch</div>
+                  </div>
+                </figcaption>
+              </figure>
+            </div>
+
+            <div class="dots" id="dots" aria-label="testimonial navigation"></div>
+          </div>
+
+          <div class="guarantee">
+            <span class="check">✓</span>
+            Practical, hands-on sessions. If you don’t leave with a working app and a clear next-step plan, tell us and we’ll make it right.
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // --- helpers ---
+    // ---------- Helper functions ----------
     const $ = (id) => document.getElementById(id);
     const startDate = $('startDate');
     const dateMsg = $('dateMsg');
@@ -121,7 +251,7 @@
       return [0,1,2,3].map(i => addDays(start, 7*i));
     }
 
-    // init min date + suggest next valid date
+    // ---------- Init: min date + suggest next valid date ----------
     (function(){
       const today = new Date(); today.setHours(0,0,0,0);
       startDate.min = toISODate(today);
@@ -180,7 +310,7 @@
     email.addEventListener('input', validateAll);
     fullName.addEventListener('input', validateAll);
 
-    // submit
+    // ---------- Submit: DO Function + Stripe ----------
     payBtn.addEventListener('click', ()=>{
       if(!validateAll()) return;
       const d = new Date(startDate.value+"T00:00:00");
@@ -188,7 +318,7 @@
       const cohort = (dayName==="Monday") ? "monday-6pm" : "tuesday-6pm";
       const goalText = document.getElementById('goal').value.trim();
 
-      // send to DO Function
+      // Send to DigitalOcean Function (web action URL)
       fetch("https://faas-nyc1-2ef2e6cc.doserverless.co/api/v1/web/fn-a0337201-782d-4986-ba08-19b2e54d33ea/default/learn-ai-coding-start-course-registrations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -196,8 +326,8 @@
           name: document.getElementById('fullName').value.trim(),
           email: document.getElementById('email').value.trim(),
           start_date: toISODate(d),
-          goal: goalText,          // server maps this into Notion 'expectation'
-          cohort                   // 'monday-6pm' or 'tuesday-6pm'
+          goal: goalText,          // server maps to Notion 'expectation'
+          cohort                   // string e.g., 'monday-6pm'
         }),
         keepalive: true
       }).catch(()=>{});
@@ -213,6 +343,29 @@
       });
       window.location.href = `${STRIPE_CHECKOUT}?${params.toString()}`;
     });
+
+    // ---------- Testimonials slider ----------
+    (function(){
+      const container = document.getElementById('testi');
+      if(!container) return;
+      const slides = Array.from(container.querySelectorAll('.quote'));
+      const dotsWrap = document.getElementById('dots');
+      let idx = 0, timer;
+
+      function renderDots(){
+        dotsWrap.innerHTML = slides.map((_,i)=>`<button aria-label="Go to testimonial ${i+1}"></button>`).join('');
+        dotsWrap.querySelectorAll('button').forEach((b,i)=> b.addEventListener('click', ()=>go(i)));
+      }
+      function setActive(i){
+        slides.forEach((s,k)=>s.classList.toggle('active', k===i));
+        dotsWrap.querySelectorAll('button').forEach((b,k)=>b.classList.toggle('active', k===i));
+      }
+      function go(i){ idx = (i+slides.length)%slides.length; setActive(idx); restart(); }
+      function next(){ go(idx+1); }
+      function restart(){ clearInterval(timer); timer = setInterval(next, 6000); }
+
+      renderDots(); setActive(idx); restart();
+    })();
   </script>
 </body>
 </html>
