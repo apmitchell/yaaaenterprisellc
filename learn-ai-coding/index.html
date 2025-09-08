@@ -191,6 +191,7 @@
                  validEmail(email.value) &&
                  validateDateAndUpdate(true);
       payBtn.disabled = !ok;
+      return !payBtn.disabled;
     }
 
     function validateDateAndUpdate(silent=false){
