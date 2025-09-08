@@ -1,1 +1,257 @@
-index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Learn AI Coding – Starter Course</title>
+  <style>
+    :root{
+      --bg:#e6f0ee; --ink:#0f2b3a; --accent:#ff8b3d; --muted:#22485b;
+      --card:#ffffff; --ok:#137d60; --warn:#b23b00;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
+      color:var(--ink); background:linear-gradient(135deg,#d8ece9 0%,#c9e0ef 40%,#d9f1ea 100%);
+    }
+    .wrap{max-width:980px;margin:32px auto;padding:16px}
+    .hero{
+      background:var(--card); border-radius:20px; padding:28px; box-shadow:0 10px 30px rgba(0,0,0,.08);
+      position:relative; overflow:hidden;
+    }
+    .badge{display:inline-block;background:#f9d76e;color:#3a2a00;font-weight:700;padding:6px 12px;border-radius:999px}
+    h1{margin:.4rem 0 0;font-size:clamp(28px,4vw,44px);line-height:1.05}
+    h1 .em{color:var(--accent)}
+    .sub{color:var(--muted);font-weight:600;margin:10px 0 20px}
+    .price{font-size:28px;font-weight:800;margin:6px 0}
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:28px}
+    @media (max-width:880px){.grid{grid-template-columns:1fr}}
+    .card{background:var(--card); border-radius:16px; padding:20px; box-shadow:0 8px 24px rgba(0,0,0,.06)}
+    label{display:block;font-weight:700;margin:14px 0 8px}
+    input, textarea, select, button{
+      width:100%; padding:12px 14px; border:2px solid #d7e3ea; border-radius:10px; font:inherit; background:#fff;
+    }
+    input:focus, textarea:focus, select:focus{outline:none;border-color:#7fb5ff;box-shadow:0 0 0 4px rgba(127,181,255,.15)}
+    small.help{display:block;color:#557086;margin-top:6px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .error{color:var(--warn);font-weight:700;margin-top:8px}
+    .ok{color:var(--ok);font-weight:700;margin-top:8px}
+    ul.schedule{margin:10px 0 0 18px}
+    .cta{margin-top:16px;background:var(--ink);color:#fff;border:none;font-weight:800;cursor:pointer}
+    .cta[disabled]{opacity:.5;cursor:not-allowed}
+    .foot{margin-top:16px;color:#476373}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <span class="badge">4-WEEK</span>
+      <h1>Build Your First <span class="em">AI-Powered App</span> in 4 Weeks</h1>
+      <div class="sub">No Experience Needed • Savannah · 6:00pm cohorts (Mon/Tue)</div>
+      <div class="grid">
+        <!-- Form -->
+        <form id="regForm" class="card" onsubmit="return false">
+          <div class="row">
+            <div>
+              <label for="fullName">Full Name</label>
+              <input id="fullName" name="fullName" autocomplete="name" required />
+            </div>
+            <div>
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" autocomplete="email" required />
+              <small class="help">We’ll send your cohort details and reminders here.</small>
+            </div>
+          </div>
+
+          <label for="startDate">Choose Your Start Date</label>
+          <input id="startDate" name="startDate" type="date" required />
+          <small class="help">
+            <strong>Only allowed:</strong> <em>1st Monday</em> or <em>3rd Tuesday</em> of a month. Class meets
+            weekly for 4 weeks at <strong>6:00pm</strong> on that same weekday.
+          </small>
+          <div id="dateMsg" class="error" style="display:none"></div>
+
+          <label for="goals">What do you hope to get out of the course?</label>
+          <textarea id="goals" name="goals" rows="4" placeholder="Tell us your goals (optional)"></textarea>
+
+          <div id="cohortInfo" class="ok" style="display:none"></div>
+          <ul id="schedule" class="schedule"></ul>
+
+          <button id="payBtn" class="cta" disabled>Register — Go to Checkout</button>
+          <div class="foot">
+            $99 + includes $200 in free cloud credits for your projects.
+          </div>
+        </form>
+
+        <!-- Info -->
+        <div class="card">
+          <div class="price">$99</div>
+          <p><strong>What you’ll learn:</strong></p>
+          <ul>
+            <li>Coding fundamentals & AI basics</li>
+            <li>Build a simple, working AI-powered app</li>
+            <li>Use AI to automate tasks & create value</li>
+            <li>Launch roadmap for side-income or career</li>
+          </ul>
+          <p><strong>Cohorts:</strong> Mondays 6:00pm (1st Monday of month) • Tuesdays 6:00pm (3rd Tuesday of month)</p>
+          <p><strong>Tip:</strong> Click the date field and choose a month—then pick the 1st Monday or 3rd Tuesday. We’ll validate it.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== Utilities =====
+    const $ = (id) => document.getElementById(id);
+
+    function startOfMonth(d){ return new Date(d.getFullYear(), d.getMonth(), 1); }
+    function addDays(d, n){ const x = new Date(d); x.setDate(x.getDate()+n); return x; }
+    function fmt(d){
+      return d.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric', year:'numeric'});
+    }
+    function toISODate(d){ return d.toISOString().slice(0,10); }
+
+    // Find nth occurrence of weekday in a month: weekday 0=Sun..6=Sat
+    function nthWeekdayOfMonth(year, monthIndex, weekday, n){
+      const first = startOfMonth(new Date(year, monthIndex, 1));
+      const firstWeekday = first.getDay();
+      const delta = (weekday - firstWeekday + 7) % 7;
+      const day = 1 + delta + 7*(n-1);
+      const candidate = new Date(year, monthIndex, day);
+      // Ensure still same month
+      return candidate.getMonth() === monthIndex ? candidate : null;
+    }
+
+    function isFirstMonday(d){
+      const m1 = nthWeekdayOfMonth(d.getFullYear(), d.getMonth(), 1, 1); // 1=Mon
+      return m1 && toISODate(m1) === toISODate(d);
+    }
+    function isThirdTuesday(d){
+      const t3 = nthWeekdayOfMonth(d.getFullYear(), d.getMonth(), 2, 3); // 2=Tue
+      return t3 && toISODate(t3) === toISODate(d);
+    }
+
+    function nextValidDates(count=6){
+      // Produce the next 'count' valid cohort start dates (1st Mon or 3rd Tue) from today.
+      const out=[];
+      let d=new Date(); d.setDate(1); // start this month
+      for(let i=0; out.length<count && i<18; i++){
+        const y=d.getFullYear(), m=d.getMonth();
+        const firstMon = nthWeekdayOfMonth(y,m,1,1);
+        const thirdTue = nthWeekdayOfMonth(y,m,2,3);
+        [firstMon, thirdTue].forEach(dt=>{
+          if(dt){
+            const today = new Date(); today.setHours(0,0,0,0);
+            if(dt >= today) out.push(dt);
+          }
+        });
+        d = new Date(y, m+1, 1);
+      }
+      return out.sort((a,b)=>a-b).slice(0,count);
+    }
+
+    function computeFourWeekSchedule(start){
+      // 4 sessions weekly at 6pm local time
+      const sessions=[];
+      for(let i=0;i<4;i++){
+        const s = addDays(start, 7*i);
+        sessions.push(s);
+      }
+      return sessions;
+    }
+
+    // ===== Form logic =====
+    const startDate = $('startDate');
+    const dateMsg = $('dateMsg');
+    const cohortInfo = $('cohortInfo');
+    const scheduleList = $('schedule');
+    const payBtn = $('payBtn');
+    const email = $('email');
+    const fullName = $('fullName');
+
+    // Initialize date input min to today
+    (function(){
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      startDate.min = toISODate(today);
+
+      // Helpful: set placeholder value to next valid date
+      const candidates = nextValidDates(1);
+      if(candidates.length) startDate.value = toISODate(candidates[0]);
+      validateDateAndUpdate();
+    })();
+
+    function validEmail(v){
+      // Reasonable email regex (keeps it simple but effective)
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+    }
+
+    function validateAll(){
+      const ok = fullName.value.trim().length>1 &&
+                 validEmail(email.value) &&
+                 validateDateAndUpdate(true);
+      payBtn.disabled = !ok;
+    }
+
+    function validateDateAndUpdate(silent=false){
+      const v = startDate.value;
+      if(!v){ showInvalid("Please pick a start date."); return false; }
+      const d = new Date(v+"T00:00:00");
+      const ok = isFirstMonday(d) || isThirdTuesday(d);
+      if(!ok){
+        showInvalid("Selected date must be the 1st Monday or 3rd Tuesday of that month.");
+        return false;
+      }
+      // Valid — render cohort info and schedule
+      const dayName = d.toLocaleDateString(undefined,{weekday:'long'});
+      const cohort = `${dayName} Cohort`;
+      const timeText = "6:00 PM";
+      dateMsg.style.display="none";
+      cohortInfo.style.display="block";
+      cohortInfo.textContent = `${cohort} · Starts ${fmt(d)} · Meets weekly at ${timeText} for 4 weeks.`;
+      renderSchedule(d);
+      return true;
+    }
+
+    function showInvalid(msg){
+      cohortInfo.style.display="none";
+      scheduleList.innerHTML="";
+      dateMsg.style.display="block";
+      dateMsg.textContent = msg;
+    }
+
+    function renderSchedule(start){
+      const sessions = computeFourWeekSchedule(start);
+      scheduleList.innerHTML = sessions.map(s=>`<li>${fmt(s)} · 6:00 PM</li>`).join('');
+    }
+
+    startDate.addEventListener('change', ()=>{ validateDateAndUpdate(); validateAll(); });
+    email.addEventListener('input', validateAll);
+    fullName.addEventListener('input', validateAll);
+
+    // Stripe checkout
+    payBtn.addEventListener('click', ()=>{
+      if(!validateAll()) return;
+      const d = new Date(startDate.value+"T00:00:00");
+      const dayName = d.toLocaleDateString(undefined,{weekday:'long'});
+      const cohort = (dayName==="Monday") ? "monday-6pm" : "tuesday-6pm";
+
+      // TODO: Replace with your real Stripe Checkout URL
+      const STRIPE_CHECKOUT = "https://buy.stripe.com/your_checkout_link";
+
+      const params = new URLSearchParams({
+        class_date: toISODate(d),
+        class_time: "18:00",
+        cohort,
+        name: fullName.value.trim(),
+        email: email.value.trim()
+      });
+      // Navigate to Stripe with query params
+      window.location.href = `${STRIPE_CHECKOUT}?${params.toString()}`;
+    });
+
+    // (Optional) expose next few valid dates in console
+    console.log("Upcoming valid cohort starts:", nextValidDates(6).map(toISODate));
+  </script>
+</body>
+</html>
