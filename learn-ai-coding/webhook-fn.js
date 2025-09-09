@@ -64,8 +64,41 @@ async function findPagesByEmail(email) {
   return json.results || [];
 }
 
-// Update a page's status rich_text to "paid"
-async function markPaid(pageId) {
+// Update a page's status to "paid" and add Stripe session info
+async function markPaidWithStripeInfo(pageId, stripeData) {
+  const properties = {
+    "status": { "select": { "name": "paid" } }
+  };
+
+  // Add Stripe session ID for linking back to Stripe dashboard
+  if (stripeData.sessionId) {
+    properties["stripe_session_id"] = {
+      "rich_text": [{ "text": { "content": stripeData.sessionId } }]
+    };
+  }
+
+  // Add clickable Stripe dashboard link
+  if (stripeData.sessionId) {
+    const stripeUrl = `https://dashboard.stripe.com/payments/${stripeData.sessionId}`;
+    properties["stripe_link"] = {
+      "url": stripeUrl
+    };
+  }
+
+  // Add payment amount for reference
+  if (stripeData.amountPaid !== undefined) {
+    properties["amount_paid"] = {
+      "number": stripeData.amountPaid / 100 // Convert cents to dollars
+    };
+  }
+
+  // Add payment date
+  if (stripeData.paymentDate) {
+    properties["payment_date"] = {
+      "date": { "start": stripeData.paymentDate }
+    };
+  }
+
   const resp = await fetch(`${NOTION_HOST}/pages/${pageId}`, {
     method: "PATCH",
     headers: {
@@ -73,12 +106,9 @@ async function markPaid(pageId) {
       "Content-Type": "application/json",
       "Notion-Version": NOTION_VERSION
     },
-    body: JSON.stringify({
-      properties: {
-        "status": { "select": { "name": "paid" } }
-      }
-    })
+    body: JSON.stringify({ properties })
   });
+  
   const json = await resp.json();
   if (!resp.ok) throw new Error(`Notion update failed: ${JSON.stringify(json)}`);
   return json;
@@ -112,20 +142,47 @@ exports.main = async (args) => {
   if (!paid) return ok({ ignored: true, reason: "not_paid" });
   if (!email) return bad(400, { error: "No email in event" });
 
+  // Extract Stripe session data for storage
+  const stripeData = {
+    sessionId: session.id,
+    amountPaid: session.amount_total || session.amount_subtotal,
+    paymentDate: new Date(session.created * 1000).toISOString().split('T')[0], // Convert Unix timestamp to ISO date
+    customerName: session.customer_details?.name || null,
+    currency: session.currency || 'usd'
+  };
+
   try {
     const pages = await findPagesByEmail(email);
 
     if (!pages.length) {
-      return ok({ updated: 0, note: "no_matching_email", email });
+      return ok({ 
+        updated: 0, 
+        note: "no_matching_email", 
+        email,
+        stripeSessionId: stripeData.sessionId
+      });
     }
 
     let updated = 0;
+    const updatedPages = [];
+    
     for (const p of pages) {
-      await markPaid(p.id);
+      await markPaidWithStripeInfo(p.id, stripeData);
       updated++;
+      updatedPages.push({
+        pageId: p.id,
+        stripeLink: `https://dashboard.stripe.com/payments/${stripeData.sessionId}`
+      });
     }
 
-    return ok({ updated, email });
+    return ok({ 
+      updated, 
+      email,
+      stripeSessionId: stripeData.sessionId,
+      stripeLink: `https://dashboard.stripe.com/payments/${stripeData.sessionId}`,
+      amountPaid: `$${(stripeData.amountPaid / 100).toFixed(2)}`,
+      pages: updatedPages
+    });
   } catch (err) {
     return bad(502, { error: err.message });
   }
