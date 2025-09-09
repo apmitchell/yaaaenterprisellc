@@ -116,7 +116,7 @@
           <label for="startDate">Choose Your Start Date</label>
           <input id="startDate" type="date" required />
           <small class="help">
-            Only allowed: <em>1st Monday</em> or <em>1st Tuesday</em> of a month. Meets weekly at <strong>6:00 PM</strong> for 4 weeks.
+            Only allowed: <em>1st Monday</em> or <em>1st Tuesday</em> of a month. Meets weekly at <strong>6:00 PM</strong> for 4 weeks. <em>Max 2 months in advance.</em>
           </small>
           <div id="dateMsg" class="error" style="display:none"></div>
 
@@ -241,6 +241,9 @@
     const payBtn = $('payBtn');
     const email = $('email');
     const fullName = $('fullName');
+    
+    // Cohort availability state by start date
+    let cohortAvailability = {}; // Will be populated with 'cohort-YYYY-MM-DD' keys
 
     function toISODate(d){ return d.toISOString().slice(0,10); }
     function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
@@ -266,20 +269,87 @@
     function computeFourWeekSchedule(start){
       return [0,1,2,3].map(i => addDays(start, 7*i));
     }
+    
+    async function checkCohortAvailability(cohort, startDate) {
+      try {
+        const resp = await fetch(`https://faas-nyc1-2ef2e6cc.doserverless.co/api/v1/web/fn-a0337201-782d-4986-ba08-19b2e54d33ea/default/learn-ai-coding-start-course-registrations?check-avail=${encodeURIComponent(cohort)}&check-date=${encodeURIComponent(startDate)}`);
+        const data = await resp.json();
+        return data.ok ? data : { isAvailable: true, spotsLeft: 10 }; // Fail open
+      } catch (err) {
+        console.error('Availability check failed:', err);
+        return { isAvailable: true, spotsLeft: 10 }; // Fail open
+      }
+    }
+    
+    function getCohortKey(cohort, startDate) {
+      return `${cohort}-${startDate}`;
+    }
+    
+    async function checkAllCohortAvailability() {
+      const today = new Date();
+      const twoMonthsLater = new Date(today.getFullYear(), today.getMonth() + 2, today.getDate());
+      
+      // Find all first Mon/Tue dates within 2 months
+      const dates = [];
+      let probe = new Date(today.getFullYear(), today.getMonth(), 1);
+      
+      for (let i = 0; i < 3; i++) { // Check current + next 2 months
+        const y = probe.getFullYear(), m = probe.getMonth();
+        const firstMon = nthWeekdayOfMonth(y, m, 1, 1);
+        const firstTue = nthWeekdayOfMonth(y, m, 2, 1);
+        
+        if (firstMon && firstMon >= today && firstMon <= twoMonthsLater) {
+          dates.push({ date: firstMon, cohort: 'monday-6pm' });
+        }
+        if (firstTue && firstTue >= today && firstTue <= twoMonthsLater) {
+          dates.push({ date: firstTue, cohort: 'tuesday-6pm' });
+        }
+        
+        probe = new Date(y, m + 1, 1);
+      }
+      
+      // Check availability for each specific cohort instance
+      for (const {date, cohort} of dates) {
+        const startDateISO = toISODate(date);
+        const availability = await checkCohortAvailability(cohort, startDateISO);
+        const key = getCohortKey(cohort, startDateISO);
+        cohortAvailability[key] = availability;
+      }
+    }
 
     // ---------- Init: min date + suggest next valid date ----------
-    (function(){
+    (async function(){
       const today = new Date(); today.setHours(0,0,0,0);
+      const twoMonthsLater = new Date(today.getFullYear(), today.getMonth() + 2, today.getDate());
+      
       startDate.min = toISODate(today);
+      startDate.max = toISODate(twoMonthsLater);
+      
+      // Check cohort availability first
+      await checkAllCohortAvailability();
 
-      // find next valid (1st Mon or 1st Tue)
+      // find next valid (1st Mon or 1st Tue) that has availability
       const out=[];
       let probe = new Date(today.getFullYear(), today.getMonth(), 1);
-      for (let i=0; out.length<1 && i<18; i++){
+      for (let i=0; out.length<1 && i<3; i++){ // Only 3 months (current + 2 ahead)
         const y=probe.getFullYear(), m=probe.getMonth();
         const firstMon = nthWeekdayOfMonth(y,m,1,1);
         const firstTue = nthWeekdayOfMonth(y,m,2,1);
-        [firstMon, firstTue].forEach(dt=>{ if(dt && dt>=today) out.push(dt); });
+        
+        // Only add dates that have available cohorts and are within 2 months
+        if(firstMon && firstMon>=today && firstMon<=twoMonthsLater) {
+          const key = getCohortKey('monday-6pm', toISODate(firstMon));
+          if(cohortAvailability[key] && cohortAvailability[key].isAvailable) {
+            out.push(firstMon);
+          }
+        }
+        if(firstTue && firstTue>=today && firstTue<=twoMonthsLater) {
+          const key = getCohortKey('tuesday-6pm', toISODate(firstTue));
+          if(cohortAvailability[key] && cohortAvailability[key].isAvailable) {
+            out.push(firstTue);
+          }
+        }
+        
         probe = new Date(y, m+1, 1);
       }
       if(out.length){ startDate.value = toISODate(out.sort((a,b)=>a-b)[0]); }
@@ -290,18 +360,40 @@
     function validateDateAndUpdate(){
       const v = startDate.value;
       if(!v){ showInvalid("Please pick a start date."); return false; }
+      
       const d = new Date(v+"T00:00:00");
+      const today = new Date(); today.setHours(0,0,0,0);
+      const twoMonthsLater = new Date(today.getFullYear(), today.getMonth() + 2, today.getDate());
+      
+      // Check if date is too far in advance
+      if(d > twoMonthsLater) {
+        showInvalid("Sorry, you can only book up to 2 months in advance.");
+        return false;
+      }
+      
       const ok = isFirstMonday(d) || isFirstTuesday(d);
       if(!ok){
         showInvalid("Selected date must be the 1st Monday or 1st Tuesday of that month.");
         return false;
       }
-      // valid → render schedule
+      
+      // Check specific cohort availability
       const dayName = d.toLocaleDateString(undefined,{weekday:'long'});
+      const cohort = (dayName==="Monday") ? "monday-6pm" : "tuesday-6pm";
+      const cohortKey = getCohortKey(cohort, toISODate(d));
+      const availability = cohortAvailability[cohortKey];
+      
+      if (!availability || !availability.isAvailable) {
+        showInvalid(`Sorry, the ${dayName} cohort starting ${fmt(d)} is full. Please choose a different date.`);
+        return false;
+      }
+      
+      // valid → render schedule
       const timeText = "6:00 PM";
+      const spotsText = availability.spotsLeft <= 3 ? ` (${availability.spotsLeft} spots left!)` : '';
       dateMsg.style.display="none";
       cohortInfo.style.display="block";
-      cohortInfo.textContent = `${dayName} Cohort · Starts ${fmt(d)} · Meets weekly at ${timeText} for 4 weeks.`;
+      cohortInfo.textContent = `${dayName} Cohort · Starts ${fmt(d)} · Meets weekly at ${timeText} for 4 weeks${spotsText}`;
       const sessions = computeFourWeekSchedule(d);
       scheduleList.innerHTML = sessions.map(s=>`<li>${fmt(s)} · 6:00 PM</li>`).join('');
       return true;
@@ -349,8 +441,8 @@
       }).catch(()=>{});
 
       // Stripe redirect (with params)
-      const STRIPE_CHECKOUT = "https://buy.stripe.com/test_8x2aEW1zNc9qc1xe9sbZe00";
-      // const STRIPE_CHECKOUT = "https://book.stripe.com/8x2aEW1zNc9qc1xe9sbZe00";
+      // const STRIPE_CHECKOUT = "https://buy.stripe.com/test_8x2aEW1zNc9qc1xe9sbZe00";
+      const STRIPE_CHECKOUT = "https://book.stripe.com/8x2aEW1zNc9qc1xe9sbZe00";
       window.location.href = `${STRIPE_CHECKOUT}?locked_prefilled_email=${encodeURIComponent(document.getElementById('email').value.trim())}`;
     });
 
