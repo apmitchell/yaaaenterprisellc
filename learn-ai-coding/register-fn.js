@@ -60,7 +60,8 @@ exports.main = async (args) => {
 
   // Build Notion page payload — adjust property names to match your DB
 const payload = {
-  parent: { database_id: process.env.NOTION_DB_ID },
+  parent: { database_id: process.env.
+   },
    properties: {
     name: { title: [{ text: { content: name } }] },   // Title
     email: { email },                                  // Email

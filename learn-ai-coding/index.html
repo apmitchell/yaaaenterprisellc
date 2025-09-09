@@ -342,15 +342,9 @@
       }).catch(()=>{});
 
       // Stripe redirect (with params)
-      const STRIPE_CHECKOUT = "https://book.stripe.com/8x2aEW1zNc9qc1xe9sbZe00";
-      const params = new URLSearchParams({
-        class_date: toISODate(d),
-        class_time: "18:00",
-        cohort,
-        name: document.getElementById('fullName').value.trim(),
-        email: document.getElementById('email').value.trim()
-      });
-      window.location.href = `${STRIPE_CHECKOUT}?${params.toString()}`;
+      const STRIPE_CHECKOUT = "https://buy.stripe.com/test_8x2aEW1zNc9qc1xe9sbZe00";
+      // const STRIPE_CHECKOUT = "https://book.stripe.com/8x2aEW1zNc9qc1xe9sbZe00";
+      window.location.href = `${STRIPE_CHECKOUT}?locked_prefilled_email=${encodeURIComponent(document.getElementById('email').value.trim())}`;
     });
 
     // ---------- Testimonials slider ----------
