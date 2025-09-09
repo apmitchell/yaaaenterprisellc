@@ -23,6 +23,9 @@
     h1 .em{color:var(--accent)}
     .sub{color:var(--muted);font-weight:600;margin:10px 0 20px}
     .price{font-size:28px;font-weight:800;margin:6px 0}
+    .price-container{display:flex;align-items:baseline;gap:12px;margin:6px 0}
+    .original-price{font-size:20px;color:#999;text-decoration:line-through;font-weight:600}
+    .early-bird{font-size:13px;color:#137d60;font-weight:700;background:#eef8f4;padding:4px 8px;border-radius:6px;margin-top:4px}
     .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:28px}
     @media (max-width:880px){.grid{grid-template-columns:1fr}}
     .card{background:var(--card); border-radius:16px; padding:20px; box-shadow:0 8px 24px rgba(0,0,0,.06)}
@@ -113,7 +116,7 @@
           <label for="startDate">Choose Your Start Date</label>
           <input id="startDate" type="date" required />
           <small class="help">
-            Only allowed: <em>1st Monday</em> or <em>3rd Tuesday</em> of a month. Meets weekly at <strong>6:00 PM</strong> for 4 weeks.
+            Only allowed: <em>1st Monday</em> or <em>1st Tuesday</em> of a month. Meets weekly at <strong>6:00 PM</strong> for 4 weeks.
           </small>
           <div id="dateMsg" class="error" style="display:none"></div>
 
@@ -129,7 +132,11 @@
 
         <!-- RIGHT: VALUE + SOCIAL PROOF -->
         <div class="card value-card">
-          <div class="price">$99</div>
+          <div class="price-container">
+            <div class="price">$99</div>
+            <div class="original-price">$199</div>
+          </div>
+          <div class="early-bird">✨ Special Savannah launch pricing — save $100!</div>
 
           <div class="value-section">
             <h3 class="value-title">What you’ll build & learn</h3>
@@ -252,9 +259,9 @@
       const m1 = nthWeekdayOfMonth(d.getFullYear(), d.getMonth(), 1, 1);
       return m1 && toISODate(m1) === toISODate(d);
     }
-    function isThirdTuesday(d){
-      const t3 = nthWeekdayOfMonth(d.getFullYear(), d.getMonth(), 2, 3);
-      return t3 && toISODate(t3) === toISODate(d);
+    function isFirstTuesday(d){
+      const t1 = nthWeekdayOfMonth(d.getFullYear(), d.getMonth(), 2, 1);
+      return t1 && toISODate(t1) === toISODate(d);
     }
     function computeFourWeekSchedule(start){
       return [0,1,2,3].map(i => addDays(start, 7*i));
@@ -265,14 +272,14 @@
       const today = new Date(); today.setHours(0,0,0,0);
       startDate.min = toISODate(today);
 
-      // find next valid (1st Mon or 3rd Tue)
+      // find next valid (1st Mon or 1st Tue)
       const out=[];
       let probe = new Date(today.getFullYear(), today.getMonth(), 1);
       for (let i=0; out.length<1 && i<18; i++){
         const y=probe.getFullYear(), m=probe.getMonth();
         const firstMon = nthWeekdayOfMonth(y,m,1,1);
-        const thirdTue = nthWeekdayOfMonth(y,m,2,3);
-        [firstMon, thirdTue].forEach(dt=>{ if(dt && dt>=today) out.push(dt); });
+        const firstTue = nthWeekdayOfMonth(y,m,2,1);
+        [firstMon, firstTue].forEach(dt=>{ if(dt && dt>=today) out.push(dt); });
         probe = new Date(y, m+1, 1);
       }
       if(out.length){ startDate.value = toISODate(out.sort((a,b)=>a-b)[0]); }
@@ -284,9 +291,9 @@
       const v = startDate.value;
       if(!v){ showInvalid("Please pick a start date."); return false; }
       const d = new Date(v+"T00:00:00");
-      const ok = isFirstMonday(d) || isThirdTuesday(d);
+      const ok = isFirstMonday(d) || isFirstTuesday(d);
       if(!ok){
-        showInvalid("Selected date must be the 1st Monday or 3rd Tuesday of that month.");
+        showInvalid("Selected date must be the 1st Monday or 1st Tuesday of that month.");
         return false;
       }
       // valid → render schedule
