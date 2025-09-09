@@ -81,6 +81,79 @@ async function checkCohortAvailability(cohort, startDate = null) {
   }
 }
 
+async function findExistingRecord(email, cohort, startDate) {
+  try {
+    const resp = await fetch(`${NOTION_QUERY_API}/${process.env.NOTION_DB_ID}/query`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.NOTION_SECRET}`,
+        "Content-Type": "application/json",
+        "Notion-Version": NOTION_VERSION
+      },
+      body: JSON.stringify({
+        filter: {
+          and: [
+            {
+              property: "email",
+              email: {
+                equals: email
+              }
+            },
+            {
+              property: "cohort",
+              rich_text: {
+                equals: cohort
+              }
+            },
+            {
+              property: "start_date",
+              date: {
+                equals: startDate
+              }
+            }
+          ]
+        }
+      })
+    });
+
+    const json = await resp.json();
+    if (!resp.ok) {
+      throw new Error(`Notion API error: ${JSON.stringify(json)}`);
+    }
+
+    return json.results.length > 0 ? json.results[0] : null;
+  } catch (err) {
+    throw new Error(`Failed to find existing record: ${err.message}`);
+  }
+}
+
+async function updateExistingRecord(pageId, goal) {
+  try {
+    const resp = await fetch(`${NOTION_API}/${pageId}`, {
+      method: "PATCH",
+      headers: {
+        "Authorization": `Bearer ${process.env.NOTION_SECRET}`,
+        "Content-Type": "application/json",
+        "Notion-Version": NOTION_VERSION
+      },
+      body: JSON.stringify({
+        properties: {
+          expectation: { rich_text: [{ text: { content: goal } }] }
+        }
+      })
+    });
+
+    const json = await resp.json();
+    if (!resp.ok) {
+      throw new Error(`Notion API error: ${JSON.stringify(json)}`);
+    }
+
+    return json;
+  } catch (err) {
+    throw new Error(`Failed to update existing record: ${err.message}`);
+  }
+}
+
 exports.main = async (args) => {
   // CORS preflight
   if (args.__ow_method === "options") {
@@ -165,6 +238,31 @@ exports.main = async (args) => {
     };
   }
 
+  // Check if record already exists for this email + cohort + date
+  try {
+    const existingRecord = await findExistingRecord(email, cohort, start_date);
+    
+    if (existingRecord) {
+      // Update existing record with new goal
+      const updated = await updateExistingRecord(existingRecord.id, goal);
+      return {
+        statusCode: 200,
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ 
+          ok: true, 
+          pageId: existingRecord.id, 
+          updated: true,
+          message: "Updated existing registration"
+        })
+      };
+    }
+  } catch (err) {
+    // Log error but continue with creation (fail open)
+    console.error("Failed to check/update existing record:", err.message);
+  }
+
   // Build Notion page payload — adjust property names to match your DB
   const payload = {
     parent: { database_id: process.env.NOTION_DB_ID },
@@ -205,7 +303,12 @@ exports.main = async (args) => {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ ok: true, pageId: json.id })
+      body: JSON.stringify({ 
+        ok: true, 
+        pageId: json.id,
+        created: true,
+        message: "Created new registration"
+      })
     };
   } catch (err) {
     return {
