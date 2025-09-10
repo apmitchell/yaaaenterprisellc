@@ -99,11 +99,23 @@
       font-size: 1rem; font-weight: 600; cursor: pointer; transition: background .2s;
     }
     button:hover { background: #3a506b; }
+    
+    .copy-btn {
+      margin-top: 8px;
+      background: #f39c12;
+    }
+    .copy-btn:hover { 
+      background: #e67e22; 
+    }
+    .copy-btn:disabled {
+      background: #bdc3c7;
+      cursor: not-allowed;
+    }
 
     #qrcode {
       display: flex; justify-content: center; align-items: center;
       margin-top: 16px; padding: 12px;
-      background: rgba(0, 0, 0, 0.15);
+      background: white;
       border-radius: 12px; min-height: 280px;
     }
 
@@ -182,6 +194,7 @@
       <label for="text">Enter text or URL</label>
       <input id="text" type="text" value="https://example.com" />
       <button onclick="makeCode()">Generate</button>
+      <button id="copyBtn" class="copy-btn" onclick="copyQRCode()" style="display: none;">Copy QR Code</button>
       <div id="qrcode"></div>
     </main>
 
@@ -218,8 +231,8 @@
       text: "https://example.com",
       width: 256,
       height: 256,
-      colorDark: "#ffffff",
-      colorLight: "transparent",
+      colorDark: "#000000",
+      colorLight: "#ffffff",
       correctLevel: QRCode.CorrectLevel.H
     });
 
@@ -227,7 +240,61 @@
       const val = document.getElementById("text").value.trim();
       if (!val) { alert("Please enter some text or URL."); return; }
       qr.makeCode(val);
+      
+      // Show copy button after QR code is generated
+      setTimeout(() => {
+        document.getElementById('copyBtn').style.display = 'block';
+      }, 100);
     }
+
+    async function copyQRCode() {
+      try {
+        const qrContainer = document.getElementById('qrcode');
+        const canvas = qrContainer.querySelector('canvas');
+        
+        if (!canvas) {
+          alert('No QR code to copy. Please generate one first.');
+          return;
+        }
+
+        // Convert canvas to blob
+        canvas.toBlob(async (blob) => {
+          try {
+            await navigator.clipboard.write([
+              new ClipboardItem({
+                'image/png': blob
+              })
+            ]);
+            
+            // Visual feedback
+            const copyBtn = document.getElementById('copyBtn');
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = 'Copied!';
+            copyBtn.disabled = true;
+            
+            setTimeout(() => {
+              copyBtn.textContent = originalText;
+              copyBtn.disabled = false;
+            }, 2000);
+            
+          } catch (err) {
+            console.error('Failed to copy image:', err);
+            alert('Failed to copy QR code. Your browser might not support this feature.');
+          }
+        }, 'image/png');
+        
+      } catch (err) {
+        console.error('Copy failed:', err);
+        alert('Failed to copy QR code. Please try again.');
+      }
+    }
+
+    // Show copy button for initial QR code
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('copyBtn').style.display = 'block';
+      }, 500);
+    });
   </script>
 </body>
 </html>
