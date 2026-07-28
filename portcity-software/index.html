@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Port City Software - Customer Discovery Survey</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #1a2a4e;
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 14px;
+            line-height: 1.6;
+            opacity: 0.95;
+        }
+
+        .form-wrapper {
+            padding: 40px 30px;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 15px;
+            font-weight: 500;
+            color: #1a2a4e;
+            margin-bottom: 8px;
+        }
+
+        .label-note {
+            font-size: 13px;
+            color: #666;
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #1a2a4e;
+            box-shadow: 0 0 0 3px rgba(26, 42, 78, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .radio-group,
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-item,
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="radio"],
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #1a2a4e;
+        }
+
+        .radio-item label,
+        .checkbox-item label {
+            margin: 0;
+            font-weight: 400;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .submit-wrapper {
+            margin-top: 40px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #1a2a4e;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #0f1829;
+        }
+
+        button:active {
+            transform: scale(0.99);
+        }
+
+        .success-message {
+            display: none;
+            padding: 20px;
+            background: #d4edda;
+            color: #155724;
+            border-radius: 6px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .divider {
+            height: 1px;
+            background: #e5e5e5;
+            margin: 35px 0;
+        }
+
+        @media (max-width: 600px) {
+            .form-wrapper {
+                padding: 25px 20px;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Port City Software</h1>
+            <p>We're learning about the challenges small business operators face with their current systems. Your insight takes 5 minutes and helps us build tools that actually solve your problems.</p>
+        </div>
+
+        <form class="form-wrapper" id="surveyForm">
+            <!-- Section 1: Business Context -->
+            <div class="form-group">
+                <label for="businessType">What type of business do you operate?</label>
+                <select id="businessType" name="businessType" required>
+                    <option value="">Select one</option>
+                    <option value="restaurant">Restaurant / Food Service</option>
+                    <option value="retail">Retail / E-commerce</option>
+                    <option value="service">Service / Contracting</option>
+                    <option value="trade">Trade / Construction</option>
+                    <option value="professional">Professional Services</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="teamSize">How many people are on your team?</label>
+                <select id="teamSize" name="teamSize" required>
+                    <option value="">Select one</option>
+                    <option value="solo">Just me</option>
+                    <option value="2-5">2–5 people</option>
+                    <option value="6-15">6–15 people</option>
+                    <option value="16+">16+ people</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="role">What's your primary role in the business?</label>
+                <input type="text" id="role" name="role" placeholder="e.g., Owner, Manager, Operations Lead" required>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Section 2: Current Systems & Workflows -->
+            <div class="form-group">
+                <label for="currentTools">What tools or systems are you using right now to run your business? (List them)</label>
+                <textarea id="currentTools" name="currentTools" placeholder="e.g., Google Sheets, Square, QuickBooks, Mailchimp..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>What's the biggest frustration with how your business systems work (or don't) together?</label>
+                <div class="label-note">Don't hold back—what drives you most crazy?</div>
+                <textarea id="frustration" name="frustration" placeholder="Describe what's broken or inefficient..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="manualTime">How much time per week do you or your team spend on manual work that feels like it should be automated? (hours)</label>
+                <input type="text" id="manualTime" name="manualTime" placeholder="e.g., 5, 10, 20" required>
+            </div>
+
+            <div class="form-group">
+                <label>Have you built workarounds (scripts, custom processes, manual data entry chains) to make your current tools work better together?</label>
+                <div class="radio-group">
+                    <div class="radio-item">
+                        <input type="radio" id="workaround-yes" name="workaround" value="yes" required>
+                        <label for="workaround-yes">Yes—we've built our own solutions</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="workaround-no" name="workaround" value="no">
+                        <label for="workaround-no">No—we just live with it</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="workaround-partial" name="workaround" value="partial">
+                        <label for="workaround-partial">Partially—we've tried a few things</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="workaroundDetail">If yes or partial: What did you build or try?</label>
+                <textarea id="workaroundDetail" name="workaroundDetail" placeholder="Tell us what you've attempted..."></textarea>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Section 3: Validation -->
+            <div class="form-group">
+                <label>If we built a custom tool or automation that solved your main frustration, would you be willing to invest in it?</label>
+                <div class="radio-group">
+                    <div class="radio-item">
+                        <input type="radio" id="invest-yes" name="invest" value="yes" required>
+                        <label for="invest-yes">Yes—absolutely</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="invest-maybe" name="invest" value="maybe">
+                        <label for="invest-maybe">Maybe—depends on cost</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="invest-no" name="invest" value="no">
+                        <label for="invest-no">No—we'd rather find an off-the-shelf tool</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="contact">Can we follow up with you? If yes, what's the best way to reach you?</label>
+                <input type="email" id="contact" name="contact" placeholder="Email or phone number">
+            </div>
+
+            <div class="submit-wrapper">
+                <button type="submit">Send Response</button>
+            </div>
+
+            <div class="success-message" id="successMessage">
+                ✓ Thank you! We'll review your response and may reach out soon.
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('surveyForm');
+        const successMessage = document.getElementById('successMessage');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Collect form data
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            // Log to console (in production, you'd send this to a server)
+            console.log('Survey Response:', data);
+
+            // Show success message
+            form.style.display = 'none';
+            successMessage.style.display = 'block';
+
+            // Optional: Reset form after delay
+            setTimeout(() => {
+                form.reset();
+                form.style.display = 'block';
+                successMessage.style.display = 'none';
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
